@@ -567,6 +567,7 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
     const int i = [self ctlAtPoint: p];
     if (i < 0) return;
     const Ctl& c = kCtls[i];
+    shown[c.param] = host->getParam (c.param);   // the live value, even between timer ticks
     readoutParam = c.param;
     status[0] = 0;
     activePreset = -1;     // settings are being changed away from the preset
