@@ -122,24 +122,24 @@ int main (int argc, char** argv)
     e->setParameter (e, kDepth, 0.5f);
     const float g0 = e->getParameter (e, kDepth);
     automateCalls = beginCalls = endCalls = 0;
-    mouse (win, panel, NSLeftMouseDown,    NSMakePoint (280, 132));
-    mouse (win, panel, NSLeftMouseDragged, NSMakePoint (280, 107));
-    mouse (win, panel, NSLeftMouseDragged, NSMakePoint (280, 82));
-    mouse (win, panel, NSLeftMouseUp,      NSMakePoint (280, 82));
+    mouse (win, panel, NSLeftMouseDown,    NSMakePoint (240, 92));
+    mouse (win, panel, NSLeftMouseDragged, NSMakePoint (240, 67));
+    mouse (win, panel, NSLeftMouseDragged, NSMakePoint (240, 42));
+    mouse (win, panel, NSLeftMouseUp,      NSMakePoint (240, 42));
     const float g1 = e->getParameter (e, kDepth);
     std::printf ("  Depth %.2f -> %.2f\n", g0, g1);
     check (std::fabs (g1 - std::min (1.0f, g0 + 0.25f)) < 0.02f, "dragging a knob up turns it up");
     check (automateCalls > 0 && beginCalls == 1 && endCalls == 1, "host gets begin / automate / end");
 
-    mouse (win, panel, NSLeftMouseDown, NSMakePoint (280, 132), 2);
-    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (280, 132), 2);
+    mouse (win, panel, NSLeftMouseDown, NSMakePoint (240, 92), 2);
+    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (240, 92), 2);
     check (std::fabs (e->getParameter (e, kDepth) - kDefaults[kDepth]) < 1e-6f, "double-click resets a knob");
 
     // Each knob answers where it is drawn
     {
         const int knobs[5] = { kFrequency, kDepth, kResonance, kInput, kOutput };
-        const CGFloat kx[5] = { 140, 280, 420, 196, 304 };
-        const CGFloat ky[5] = { 132, 132, 132, 296, 296 };
+        const CGFloat kx[5] = { 120, 240, 360, 230, 350 };
+        const CGFloat ky[5] = { 92, 92, 92, 548, 548 };
         bool all = true;
         for (int k = 0; k < 5; ++k)
         {
@@ -153,32 +153,32 @@ int main (int argc, char** argv)
         check (all, "all five knobs turn");
     }
 
-    // Effect rocker: bottom half out, top half in
-    mouse (win, panel, NSLeftMouseDown, NSMakePoint (642, 140));
-    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (642, 140));
-    check (e->getParameter (e, kEffect) < 0.5f, "Effect rocker switches out");
+    // Stomp switch: each press toggles
+    mouse (win, panel, NSLeftMouseDown, NSMakePoint (240, 376));
+    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (240, 376));
+    check (e->getParameter (e, kEffect) < 0.5f, "footswitch switches the effect out");
     pump (0.1);
     renderPNG (panel, dir + "/panel_bypassed.png");
-    mouse (win, panel, NSLeftMouseDown, NSMakePoint (642, 108));
-    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (642, 108));
+    mouse (win, panel, NSLeftMouseDown, NSMakePoint (240, 376));
+    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (240, 376));
     check (e->getParameter (e, kEffect) >= 0.5f, "and back in");
 
     // Strip knob turned up shows in the readout
     const float a0 = e->getParameter (e, kOutput);
-    mouse (win, panel, NSLeftMouseDown,    NSMakePoint (304, 296));
-    mouse (win, panel, NSLeftMouseDragged, NSMakePoint (304, 276));
-    mouse (win, panel, NSLeftMouseUp,      NSMakePoint (304, 276));
+    mouse (win, panel, NSLeftMouseDown,    NSMakePoint (350, 548));
+    mouse (win, panel, NSLeftMouseDragged, NSMakePoint (350, 528));
+    mouse (win, panel, NSLeftMouseUp,      NSMakePoint (350, 528));
     check (e->getParameter (e, kOutput) > a0 + 0.05f, "strip knobs turn");
     renderPNG (panel, dir + "/panel_readout.png");
     e->setParameter (e, kOutput, 0.5f);
 
     std::printf ("\nPresets\n");
-    #define SLOT(k) NSMakePoint (418.0 + (k) * 26.0 + 11.0, 296.0)
+    #define SLOT(k) NSMakePoint (104.0 + (k) * 42.0 + 18.0, 617.0)
     e->setParameter (e, kResonance, 0.3f);
     e->setParameter (e, kEffect, 0.0f);
     pump (0.1);
-    mouse (win, panel, NSLeftMouseDown, NSMakePoint (385, 296));    // SAVE
-    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (385, 296));
+    mouse (win, panel, NSLeftMouseDown, NSMakePoint (67, 617));    // SAVE
+    mouse (win, panel, NSLeftMouseUp,   NSMakePoint (67, 617));
     mouse (win, panel, NSLeftMouseDown, SLOT (2));                   // slot 3
     mouse (win, panel, NSLeftMouseUp,   SLOT (2));
     FILE* pf = std::fopen (presetFile.c_str(), "r");

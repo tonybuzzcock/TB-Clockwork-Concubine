@@ -9,7 +9,7 @@
 namespace tbcc
 {
 
-enum { kEditorWidth = 900, kEditorHeight = 330 };
+enum { kEditorWidth = 480, kEditorHeight = 720 };   // 2:3, like the pedal
 
 // What the editor needs from the plugin.
 class EditorHost

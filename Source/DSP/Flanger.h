@@ -23,7 +23,6 @@
 //   period) follows the LFO; U2 (4013) divides it into the BBD's clock.
 //   LFO: IC1.B / C2 680n integrator, IC1.C and the other half of U2 as the
 //   Schmitt trigger, FREQUENCY = VR2 1M reverse log.
-//   Lamps LP1-3 (18 V) are bright with the effect in (S1.B shorts R13).
 //
 // Modelled as a circuit: every resistor and capacitor in the audio path,
 // the 741s on the +/-6V8 zener rails (swing and slew), the BBD as a clocked
@@ -75,7 +74,6 @@ public:
     double currentDelayMs() const;
     double currentClockHz() const;      // the BBD clock (each section)
     double lfoValue() const { return lfoTri; }                   // -1..1
-    double lamp() const { return effect; }                       // 0 dim .. 1 bright
     double peakBbd() const { return peakBbdLevel; }
     void   clearPeakBbd() { peakBbdLevel = 0.0; }
 

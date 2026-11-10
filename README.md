@@ -38,7 +38,7 @@ From the drawing:
 - the IC5 mixer: dry from IC2 through R31 47K, wet through the RX2 10K / CX 47n +
   R39 2K2 / R40 22K de-emphasis, R33 22K || CX2 6n8 feedback; C19 / R38 out
 - the 741s on the ±6V8 zener rails (output swing, slew rate)
-- S1: Effect Out passes the input straight through; the lamps (LP1-3) dim
+- S1: Effect Out passes the input straight through
 
 What that gives: with the knobs at the defaults, the dry and wet signals are
 nearly equal from about 300 Hz to 1 kHz, so the notches there are deep (about
@@ -65,14 +65,15 @@ Not fixed by the drawing, so estimated (named constants in `Source/DSP/Flanger.c
 
 ## The panel
 
-On the Mac the plugin opens its own panel (900 × 330): FREQUENCY, DEPTH and
-RESONANCE knobs, the EFFECT footswitch rocker with the three lamps, and the
-strip along the bottom with the TB Electronic mark, Input, Output, the presets
-and the readout.
+On the Mac the plugin opens its own panel (480 × 720, the pedal's 2:3), laid out like the
+pedal: the FREQUENCY, DEPTH and RESONANCE knobs (scales marked 0 and 10), the
+name plate, and the striped panel with the stomp switch, which glows red with
+the effect in. The strip along the bottom has the TB Electronic mark, Input,
+Output, the presets and the readout. The drawing's lamps (LP1-3) are left out.
 
 Drag knobs up/down (hold Shift for fine control), double-click a knob to reset
-it, or use the scroll wheel. Rocker: press the top half for In, the bottom
-half for Out.
+it, or use the scroll wheel. Click the stomp switch to switch the effect in
+or out.
 
 **Presets:** click SAVE, then a slot 1–8. Click a saved slot to recall it; the
 slot in use lights green. Presets are shared by every instance, in

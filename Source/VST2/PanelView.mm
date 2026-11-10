@@ -1,10 +1,10 @@
 // PanelView.mm
 // The custom panel for TB Clockwork Concubine: an original design laid out
-// like the pedal's controls. Opaque silver, black lettering, grey knurled
-// knobs with a red position line for FREQUENCY, DEPTH and RESONANCE, a
-// rocker for the effect footswitch with the pedal's three lamps beside it, and
-// a strip of plugin controls along the bottom (TB Electronic mark, Input,
-// Output, presets and the readout).
+// like the pedal. Opaque silver, black lettering, grey knurled knobs with a
+// red position line for FREQUENCY, DEPTH and RESONANCE (scales marked 0 and
+// 10 as on the pedal), the name plate, and the striped panel with the stomp
+// switch in it. A strip of plugin controls runs along the bottom
+// (TB Electronic mark, Input, Output, presets and the readout).
 //
 // Cocoa, manual retain/release, and only APIs that exist in Mac OS X 10.8.
 // Everything is drawn in code; no image files.
@@ -24,7 +24,7 @@ using namespace tbcc;
 namespace
 {
 
-enum CtlType { kCtlKnob, kCtlRocker, kCtlSmallKnob };
+enum CtlType { kCtlKnob, kCtlFootswitch, kCtlSmallKnob };
 
 struct Ctl
 {
@@ -32,30 +32,32 @@ struct Ctl
     int type;
     CGFloat cx, cy, r;
     const char* label;
-    const char* posA;      // rocker off / small knob left
-    const char* posB;      // rocker on / small knob right
+    const char* posA;      // small knob left
+    const char* posB;      // small knob right
 };
 
-const CGFloat kStripTop = 250.0;
-const CGFloat kDivider = 560.0;
-const CGFloat kLampY = 118.0;
-const CGFloat kLampX[3] = { 742.0, 792.0, 842.0 };
+// Portrait, 2:3 like the pedal: knob ledge, name plate, striped panel with the
+// stomp switch, then the plugin strip.
+const CGFloat kStripTop = 500.0;
+const CGFloat kLedge = 160.0;
+const NSRect kGrille = { { 44.0, 270.0 }, { 392.0, 196.0 } };
 
 // Main panel, then the plugin strip.
 const Ctl kCtls[] = {
-    { kFrequency, kCtlKnob,      140, 132, 30, "FREQUENCY", 0, 0 },
-    { kDepth,     kCtlKnob,      280, 132, 30, "DEPTH",     0, 0 },
-    { kResonance, kCtlKnob,      420, 132, 30, "RESONANCE", 0, 0 },
-    { kEffect,    kCtlRocker,    642, 124, 0,  "EFFECT",    "OUT", "IN" },
+    { kFrequency, kCtlKnob,      120,  92, 26, "FREQUENCY", 0, 0 },
+    { kDepth,     kCtlKnob,      240,  92, 26, "DEPTH",     0, 0 },
+    { kResonance, kCtlKnob,      360,  92, 26, "RESONANCE", 0, 0 },
+    { kEffect,    kCtlFootswitch,240, 376, 22, "EFFECT",    0, 0 },
     // Plugin strip
-    { kInput,     kCtlSmallKnob, 196, 296, 15, "INPUT",     "-12", "+12" },
-    { kOutput,    kCtlSmallKnob, 304, 296, 15, "OUTPUT",    "-24", "+24" },
+    { kInput,     kCtlSmallKnob, 230, 548, 15, "INPUT",     "-12", "+12" },
+    { kOutput,    kCtlSmallKnob, 350, 548, 15, "OUTPUT",    "-24", "+24" },
 };
 
 // Preset section in the strip: a SAVE button and slots 1..8, then the readout
-const NSRect kSaveRect = { { 360.0, 284.0 }, { 50.0, 24.0 } };
-const CGFloat kSlotX0 = 418.0, kSlotPitch = 26.0, kSlotW = 23.0, kSlotY = 284.0, kSlotH = 24.0;
-const NSRect kReadoutRect = { { 640.0, 276.0 }, { 246.0, 40.0 } };
+const NSRect kSaveRect = { { 40.0, 604.0 }, { 54.0, 26.0 } };
+const CGFloat kSlotX0 = 104.0, kSlotPitch = 42.0, kSlotW = 36.0, kSlotY = 604.0, kSlotH = 26.0;
+const CGFloat kPresetLabelY = 590.0;
+const NSRect kReadoutRect = { { 20.0, 646.0 }, { 440.0, 56.0 } };
 
 inline NSRect slotRect (int k) { return NSMakeRect (kSlotX0 + k * kSlotPitch, kSlotY, kSlotW, kSlotH); }
 const int kNumCtls = (int) (sizeof (kCtls) / sizeof (kCtls[0]));
@@ -227,22 +229,20 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
     [border setLineWidth: 1.0];
     [border stroke];
 
-    // Section divider and titles
+    // The step between the knob ledge and the body
     NSColor* ink = [NSColor blackColor];
-    {
-        NSBezierPath* p = [NSBezierPath bezierPath];
-        [p moveToPoint: NSMakePoint (kDivider + 0.5, 22)];
-        [p lineToPoint: NSMakePoint (kDivider + 0.5, 232)];
-        [rgb (60, 62, 65) set];
-        [p setLineWidth: 1.0];
-        [p stroke];
-    }
-    drawText ("FLANGER", boldFont (12.0), ink, 280, 22);
-    drawText ("FOOTSWITCH", boldFont (12.0), ink, (kDivider + 893.0) * 0.5, 22);
+    [rgb (60, 62, 65) set];
+    NSRectFill (NSMakeRect (7.0, kLedge, b.size.width - 14.0, 1.5));
+    [rgb (240, 242, 244) set];
+    NSRectFill (NSMakeRect (7.0, kLedge + 1.5, b.size.width - 14.0, 1.0));
+
+    // Name plate, as on the pedal (plain lettering, no maker's artwork)
+    drawText ("FLANGER", boldFont (24.0), ink, NSMidX (kGrille), 196);
+    drawText ("CLOCKWORK CONCUBINE", boldFont (20.0), ink, NSMidX (kGrille), 236);
 
     // Owner's mark in the strip's corner: red TB over "Electronic", straight on the silver
     {
-        const NSRect plate = NSMakeRect (14.5, 262.5, 100.0, 56.0);
+        const NSRect plate = NSMakeRect (14.5, 516.5, 100.0, 56.0);
         drawText ("TB", markBoldFont (28.0), rgb (200, 30, 30), NSMidX (plate), plate.origin.y + 21.0);
         drawText ("Electronic", markPlainFont (12.0), ink, NSMidX (plate), plate.origin.y + 44.0);
     }
@@ -261,10 +261,12 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
         [ink set];
         [t stroke];
 
-        char num[4];
-        std::snprintf (num, sizeof (num), "%d", i);
-        const NSPoint p = polar (c.cx, c.cy, c.r + 16.0, a);
-        drawText (num, plainFont (9.0), ink, p.x, p.y);
+        // The pedal marks only the ends: 0 and 10
+        if (i == 0 || i == 10)
+        {
+            const NSPoint p = polar (c.cx, c.cy, c.r + 18.0, a);
+            drawText (i == 0 ? "0" : "10", plainFont (10.0), ink, p.x, p.y);
+        }
     }
 }
 
@@ -320,64 +322,75 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
     [line stroke];
 }
 
-// Rocker switch: the pressed-in end is the active position.
-- (void) drawRocker: (const Ctl&) c
+// The striped panel the stomp switch sits in.
+- (void) drawGrille
 {
-    NSColor* ink = [NSColor blackColor];
-    const bool on = isOn (shown[c.param]);
-    const CGFloat w = 26.0, h = 44.0;
-    const NSRect bezel = NSMakeRect (c.cx - w * 0.5 - 4, c.cy - h * 0.5 - 4, w + 8, h + 8);
+    const NSRect g = kGrille;
+    NSBezierPath* frame = [NSBezierPath bezierPathWithRect: NSInsetRect (g, -3.0, -3.0)];
+    [rgb (60, 62, 65) set];
+    [frame fill];
 
-    NSBezierPath* bz = [NSBezierPath bezierPathWithRoundedRect: bezel xRadius: 4 yRadius: 4];
-    [rgb (35, 36, 38) set];
-    [bz fill];
+    // Muted red under silver slats
+    NSGradient* base = [[[NSGradient alloc] initWithStartingColor: rgb (214, 120, 118) endingColor: rgb (176, 84, 84)] autorelease];
+    [base drawInRect: g angle: 90.0];
 
-    const NSRect top = NSMakeRect (c.cx - w * 0.5, c.cy - h * 0.5, w, h * 0.5);
-    const NSRect bot = NSMakeRect (c.cx - w * 0.5, c.cy, w, h * 0.5);
-    // The raised half is lighter; ON = top half pressed in
-    NSGradient* raised = [[[NSGradient alloc] initWithStartingColor: rgb (120, 122, 126) endingColor: rgb (66, 68, 71)] autorelease];
-    NSGradient* pressed = [[[NSGradient alloc] initWithStartingColor: rgb (40, 41, 43) endingColor: rgb (58, 60, 63)] autorelease];
-    [(on ? pressed : raised) drawInRect: top angle: on ? 90.0 : -90.0];
-    [(on ? raised : pressed) drawInRect: bot angle: on ? 90.0 : -90.0];
-
-    // Markings on the rocker: a bar for ON, a ring for OFF
-    [[NSColor colorWithCalibratedWhite: 0.92 alpha: 1.0] set];
-    NSRectFill (NSMakeRect (c.cx - 1.0, c.cy - h * 0.5 + 6, 2.0, 9.0));
-    NSBezierPath* ring = [NSBezierPath bezierPathWithOvalInRect: NSMakeRect (c.cx - 4.5, c.cy + h * 0.5 - 15, 9, 9)];
-    [ring setLineWidth: 1.6];
-    [ring stroke];
-
-    drawText (c.label, boldFont (11.0), ink, c.cx, c.cy - h * 0.5 - 16.0);
-    drawTextLeft (c.posB, boldFont (9.5), ink, c.cx + w * 0.5 + 9.0, c.cy - h * 0.25);
-    drawTextLeft (c.posA, boldFont (9.5), ink, c.cx + w * 0.5 + 9.0, c.cy + h * 0.25);
+    // Fine vertical slats
+    for (CGFloat x = g.origin.x + 2.0; x < NSMaxX (g) - 1.0; x += 4.0)
+    {
+        [[NSColor colorWithCalibratedRed: 0.80 green: 0.80 blue: 0.82 alpha: 0.85] set];
+        NSRectFill (NSMakeRect (x, g.origin.y, 2.0, g.size.height));
+    }
 }
 
-// LP1-3: bright with the effect in, glowing dimly through R13 when out.
-- (void) drawLamps
+// Chrome stomp switch: click to toggle.
+- (void) drawFootswitch: (const Ctl&) c
 {
-    NSColor* ink = [NSColor blackColor];
+    const NSPoint ctr = NSMakePoint (c.cx, c.cy);
     const bool on = isOn (shown[kEffect]);
-    for (int i = 0; i < 3; ++i)
+    // Red glow around the switch with the effect in
+    if (on)
     {
-        const CGFloat cx = kLampX[i], cy = kLampY, r = 13.0;
-        // Chrome bezel
-        NSGradient* bez = [[[NSGradient alloc] initWithStartingColor: rgb (236, 238, 240) endingColor: rgb (110, 113, 117)] autorelease];
-        NSBezierPath* bp = [NSBezierPath bezierPathWithOvalInRect: NSMakeRect (cx - r - 4, cy - r - 4, 2 * r + 8, 2 * r + 8)];
-        [bez drawInBezierPath: bp angle: -60.0];
-        [rgb (60, 62, 65) set];
-        [bp setLineWidth: 0.8];
-        [bp stroke];
-        // Lens: warm amber, bright or dim
-        NSBezierPath* lens = [NSBezierPath bezierPathWithOvalInRect: NSMakeRect (cx - r, cy - r, 2 * r, 2 * r)];
-        NSGradient* g = on
-            ? [[[NSGradient alloc] initWithStartingColor: rgb (255, 246, 196) endingColor: rgb (240, 150, 30)] autorelease]
-            : [[[NSGradient alloc] initWithStartingColor: rgb (150, 104, 60) endingColor: rgb (84, 52, 26)] autorelease];
-        [g drawInBezierPath: lens relativeCenterPosition: NSMakePoint (-0.2, 0.3)];
-        [rgb (50, 40, 30) set];
-        [lens setLineWidth: 0.8];
-        [lens stroke];
+        const CGFloat gr = c.r + 30.0;
+        NSGradient* halo = [[[NSGradient alloc] initWithColorsAndLocations:
+                               [NSColor colorWithCalibratedRed: 1.0 green: 0.16 blue: 0.10 alpha: 0.95], 0.0,
+                               [NSColor colorWithCalibratedRed: 1.0 green: 0.10 blue: 0.06 alpha: 0.55], 0.45,
+                               [NSColor colorWithCalibratedRed: 1.0 green: 0.05 blue: 0.02 alpha: 0.0], 1.0, nil] autorelease];
+        [halo drawInBezierPath: [NSBezierPath bezierPathWithOvalInRect: NSMakeRect (ctr.x - gr, ctr.y - gr, 2 * gr, 2 * gr)]
+              relativeCenterPosition: NSMakePoint (0.0, 0.0)];
     }
-    drawText ("LAMPS", boldFont (11.0), ink, kLampX[1], kLampY - 38.0);
+    // Hex nut
+    NSBezierPath* nut = [NSBezierPath bezierPath];
+    for (int k = 0; k < 6; ++k)
+    {
+        const NSPoint p = polar (ctr.x, ctr.y, c.r + 9.0, (CGFloat) (M_PI / 6.0 + k * M_PI / 3.0));
+        if (k == 0) [nut moveToPoint: p]; else [nut lineToPoint: p];
+    }
+    [nut closePath];
+    NSGradient* ng = [[[NSGradient alloc] initWithStartingColor: rgb (226, 228, 231) endingColor: rgb (118, 121, 125)] autorelease];
+    [ng drawInBezierPath: nut angle: -60.0];
+    [rgb (60, 62, 65) set];
+    [nut setLineWidth: 0.8];
+    [nut stroke];
+
+    // Plunger: a dome, pressed in a touch and lit red when the effect is in
+    const CGFloat r = on ? c.r - 1.5 : c.r;
+    [NSGraphicsContext saveGraphicsState];
+    NSShadow* sh = [[[NSShadow alloc] init] autorelease];
+    [sh setShadowOffset: NSMakeSize (1.0, on ? -1.0 : -2.5)];
+    [sh setShadowBlurRadius: on ? 2.0 : 4.0];
+    [sh setShadowColor: [NSColor colorWithCalibratedWhite: 0.0 alpha: 0.5]];
+    [sh set];
+    NSBezierPath* dome = [NSBezierPath bezierPathWithOvalInRect: NSMakeRect (ctr.x - r, ctr.y - r, 2 * r, 2 * r)];
+    [rgb (150, 153, 157) set];
+    [dome fill];
+    [NSGraphicsContext restoreGraphicsState];
+    NSGradient* dg = on
+        ? [[[NSGradient alloc] initWithStartingColor: rgb (255, 214, 200) endingColor: rgb (200, 22, 16)] autorelease]
+        : [[[NSGradient alloc] initWithStartingColor: rgb (250, 251, 252) endingColor: rgb (96, 99, 104)] autorelease];
+    [dg drawInBezierPath: dome relativeCenterPosition: NSMakePoint (-0.35, 0.4)];
+    [rgb (55, 57, 60) set];
+    [dome setLineWidth: 1.0];
+    [dome stroke];
 }
 
 - (void) drawReadout
@@ -394,7 +407,7 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
 
     if (status[0])
     {
-        drawText (status, boldFont (14.0), [NSColor blackColor], NSMidX (box), NSMidY (box));
+        drawText (status, boldFont (16.0), [NSColor blackColor], NSMidX (box), NSMidY (box));
     }
     else if (readoutParam >= 0 && host)
     {
@@ -407,14 +420,14 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
         const int kind = kParamKind[readoutParam];
         const char* unit = kind == kRateHz ? " Hz" : ((kind == kDb12 || kind == kDb24) ? " dB" : "");
         std::snprintf (text, sizeof (text), "%s   %s%s", name ? name : "", disp, unit);
-        drawText (text, boldFont (14.0), [NSColor blackColor], NSMidX (box), NSMidY (box));
+        drawText (text, boldFont (16.0), [NSColor blackColor], NSMidX (box), NSMidY (box));
     }
 }
 
 - (void) drawPresets
 {
     NSColor* ink = [NSColor blackColor];
-    drawText ("PRESETS", boldFont (10.0), ink, (NSMinX (kSaveRect) + NSMaxX (slotRect (kNumPresetSlots - 1))) * 0.5, 266);
+    drawText ("PRESETS", boldFont (10.0), ink, (NSMinX (kSaveRect) + NSMaxX (slotRect (kNumPresetSlots - 1))) * 0.5, kPresetLabelY);
 
     // SAVE button: lit red while it is waiting for a slot
     NSBezierPath* sp = [NSBezierPath bezierPathWithRoundedRect: kSaveRect xRadius: 3 yRadius: 3];
@@ -455,6 +468,7 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
 {
     (void) dirty;
     [self drawBackground];
+    [self drawGrille];
     NSColor* ink = [NSColor blackColor];
 
     for (int i = 0; i < kNumCtls; ++i)
@@ -467,8 +481,8 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
                 [self drawKnobAt: NSMakePoint (c.cx, c.cy) radius: c.r value: shown[c.param]];
                 drawText (c.label, boldFont (12.0), ink, c.cx, c.cy - c.r - 38.0);
                 break;
-            case kCtlRocker:
-                [self drawRocker: c];
+            case kCtlFootswitch:
+                [self drawFootswitch: c];
                 break;
             case kCtlSmallKnob:
             {
@@ -481,7 +495,6 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
             default: break;
         }
     }
-    [self drawLamps];
     [self drawPresets];
     [self drawReadout];
 }
@@ -494,11 +507,6 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
     for (int i = 0; i < kNumCtls; ++i)
     {
         const Ctl& c = kCtls[i];
-        if (c.type == kCtlRocker)
-        {
-            if (std::fabs (p.x - c.cx) < 22 && std::fabs (p.y - c.cy) < 30) return i;
-        }
-        else
         {
             const CGFloat dx = p.x - c.cx, dy = p.y - c.cy;
             if (dx * dx + dy * dy < (c.r + 8) * (c.r + 8)) return i;
@@ -572,11 +580,11 @@ void drawTextLeft (const char* s, NSFont* font, NSColor* color, CGFloat x, CGFlo
     status[0] = 0;
     activePreset = -1;     // settings are being changed away from the preset
 
-    if (c.type == kCtlRocker)
+    if (c.type == kCtlFootswitch)
     {
-        // Press the top half for IN, the bottom half for OUT
+        // Each press toggles, like the pedal's latching switch
         host->guiBeginEdit (c.param);
-        [self setParam: c.param value: (p.y < c.cy) ? 1.0f : 0.0f];
+        [self setParam: c.param value: isOn (shown[c.param]) ? 0.0f : 1.0f];
         host->guiEndEdit (c.param);
         return;
     }

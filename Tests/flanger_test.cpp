@@ -201,10 +201,7 @@ int main (int argc, char** argv)
         }
         std::printf ("  bypassed vs input (latency aligned): max diff %.2g of 0.3\n", maxd);
         check (maxd < 0.02, "S1 out passes the input straight through");
-        check (a.lamp() < 0.01, "lamps dim when bypassed");
         a.setEffectOn (true);
-        run (a, x);
-        check (a.lamp() > 0.99, "lamps bright with the effect in");
     }
 
     std::printf ("\n2. BBD delay and DEPTH\n");
