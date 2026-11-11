@@ -81,7 +81,7 @@ slot in use lights green. Presets are shared by every instance, in
 
 ## Install
 
-1. GitHub → Actions → latest run → Artifacts → `TB-Clockwork-Concubine-mac-vst`
+1. GitHub → Actions → latest run → Artifacts → `TB-Clockwork-Concubine-mountain-lion-vst`
 2. Unzip twice to get `TB Clockwork Concubine.vst`
 3. Copy it to `/Library/Audio/Plug-Ins/VST/` and rescan in PatchWork
 
