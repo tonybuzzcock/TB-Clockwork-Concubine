@@ -68,7 +68,7 @@ Not fixed by the drawing, so estimated (named constants in `Source/DSP/Flanger.c
 On the Mac the plugin opens its own panel (480 × 720, the pedal's 2:3), laid out like the
 pedal: the FREQUENCY, DEPTH and RESONANCE knobs (scales marked 0 and 10), the
 name plate, and the striped panel with the stomp switch, which glows red with
-the effect in. The strip along the bottom has the TB Electronic mark, Input,
+the effect in. The strip along the bottom has the TB electronic logo, Input,
 Output, the presets and the readout. The drawing's lamps (LP1-3) are left out.
 
 Drag knobs up/down (hold Shift for fine control), double-click a knob to reset
