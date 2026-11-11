@@ -29,7 +29,7 @@
 namespace
 {
 
-const VstInt32 kUniqueID    = VST_FOURCC ('T', 'B', 'c', 'c');
+const VstInt32 kUniqueID    = VST_FOURCC ('T', 'B', 'c', 'w');   // was 'TBcc', which TB Copicat also uses
 const VstInt32 kVersion     = 1000;       // 1.0.0
 const VstInt32 kNumChannels = 2;
 const char* const kPluginName = "TB Clockwork Concubine";

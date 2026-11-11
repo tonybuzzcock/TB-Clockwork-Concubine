@@ -90,7 +90,7 @@ int main (int argc, char** argv)
     check ((e->flags & effFlagsCanReplacing) != 0, "processReplacing supported");
     check ((e->flags & effFlagsIsSynth) == 0, "not flagged as an instrument");
     check (e->initialDelay == tbcc::Flanger::latencySamples(), "reports oversampler latency");
-    check (e->uniqueID == VST_FOURCC ('T', 'B', 'c', 'c'), "unique ID 'TBcc'");
+    check (e->uniqueID == VST_FOURCC ('T', 'B', 'c', 'w'), "unique ID 'TBcw'");
     char buf[256];
     std::memset (buf, 0, sizeof (buf));
     call (e, effGetEffectName, 0, 0, buf);
